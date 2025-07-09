@@ -115,7 +115,7 @@ async function fetchAmplemarketLists(apiToken) {
   const pageSize = 100;
 
   do {
-    const url = new URL('https://api.amplemarket.com/v1/lead-lists');
+    const url = new URL('https://api.amplemarket.com/lead-lists');
     url.searchParams.append('page_size', pageSize);
     if (pageAfter) url.searchParams.append('page_after', pageAfter);
 
@@ -153,7 +153,7 @@ async function fetchAmplemarketLeads(apiToken, listId) {
   const pageSize = 100;
 
   do {
-    const url = new URL(`https://api.amplemarket.com/v1/lead-lists/${listId}/leads`);
+    const url = new URL(`https://api.amplemarket.com/lead-lists/${listId}/leads`);
     url.searchParams.append('page_size', pageSize);
     if (pageAfter) url.searchParams.append('page_after', pageAfter);
 
