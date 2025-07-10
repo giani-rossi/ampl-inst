@@ -1,4 +1,3 @@
-// Adaptación a CommonJS para Vercel sin usar modules ni .mjs
 const fetch = require('node-fetch');
 
 module.exports = async function (req, res) {
@@ -126,12 +125,11 @@ async function fetchAmplemarketLists(apiToken) {
     const data = await response.json();
     console.log('Amplemarket raw response:', data);
 
- if (data.lead_lists && Array.isArray(data.lead_lists)) {
-  allLists.push(...data.lead_lists);
-} else {
-  throw new Error(`Unexpected Amplemarket response format`);
-}
-
+    if (data.lead_lists && Array.isArray(data.lead_lists)) {
+      allLists.push(...data.lead_lists);
+    } else {
+      throw new Error(`Unexpected Amplemarket response format`);
+    }
 
     pageAfter = data.page_after || null;
   } while (pageAfter);
@@ -139,42 +137,27 @@ async function fetchAmplemarketLists(apiToken) {
   return allLists;
 }
 
+// 🔁 ✅ FUNCION MODIFICADA (usa /lead-lists/{id} para obtener los leads)
 async function fetchAmplemarketLeads(apiToken, listId) {
-  const leads = [];
-  let pageAfter = null;
-  const pageSize = 100;
-
-  do {
-    const url = new URL(`https://api.amplemarket.com/lead-lists/${listId}/leads`);
-    url.searchParams.append('page_size', pageSize);
-    if (pageAfter) url.searchParams.append('page_after', pageAfter);
-
-    const response = await fetch(url.toString(), {
-      headers: {
-        'Authorization': `Bearer ${apiToken}`,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Amplemarket API error: ${response.status} - ${errorText}`);
+  const response = await fetch(`https://api.amplemarket.com/lead-lists/${listId}`, {
+    headers: {
+      'Authorization': `Bearer ${apiToken}`,
+      'Accept': 'application/json'
     }
+  });
 
-    const data = await response.json();
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Amplemarket API error: ${response.status} - ${errorText}`);
+  }
 
-    if (data.items && Array.isArray(data.items)) {
-      leads.push(...data.items);
-    } else if (Array.isArray(data)) {
-      leads.push(...data);
-    } else {
-      break;
-    }
+  const data = await response.json();
 
-    pageAfter = data.page_after || null;
-  } while (pageAfter);
+  if (!data.leads || !Array.isArray(data.leads)) {
+    throw new Error(`Unexpected Amplemarket list format for listId ${listId}`);
+  }
 
-  return leads;
+  return data.leads;
 }
 
 async function fetchInstantlyCampaigns(apiKey) {
@@ -214,7 +197,6 @@ async function fetchInstantlyCampaigns(apiKey) {
 
   return allCampaigns;
 }
-
 
 async function sendLeadsToInstantly(apiKey, campaignId, leads) {
   const instantlyLeads = leads.map(lead => ({
