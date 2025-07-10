@@ -6,13 +6,13 @@ module.exports = async function (req, res) {
   }
 
   try {
-    const { amplemarketToken, instantlyToken } = req.body;
+const { amplemarketToken, instantlyV2Token, instantlyV1ApiKey } = req.body;
 
     if (!amplemarketToken || !instantlyToken) {
       return res.status(400).json({ error: 'Missing tokens' });
     }
 
-    const result = await syncAmplemarketToInstantly(amplemarketToken, instantlyToken);
+const result = await syncAmplemarketToInstantly(amplemarketToken, instantlyV2Token, instantlyV1ApiKey);
     return res.status(200).json(result);
   } catch (err) {
     return res.status(500).json({ error: err.message, stack: err.stack });
