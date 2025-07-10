@@ -8,9 +8,10 @@ module.exports = async function (req, res) {
   try {
 const { amplemarketToken, instantlyV2Token, instantlyV1ApiKey } = req.body;
 
-    if (!amplemarketToken || !instantlyToken) {
-      return res.status(400).json({ error: 'Missing tokens' });
-    }
+if (!amplemarketToken || !instantlyV2Token || !instantlyV1ApiKey) {
+  return res.status(400).json({ error: 'Missing tokens' });
+}
+
 
 const result = await syncAmplemarketToInstantly(amplemarketToken, instantlyV2Token, instantlyV1ApiKey);
     return res.status(200).json(result);
