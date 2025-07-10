@@ -133,19 +133,19 @@ async function fetchAmplemarketLists(apiToken) {
 
     const data = await response.json();
 
-    if (data.items && Array.isArray(data.items)) {
-      allLists.push(...data.items);
-    } else if (Array.isArray(data)) {
-      allLists.push(...data);
-    } else {
-      throw new Error(`Unexpected Amplemarket response format`);
-    }
+// DEBUG: Mostramos en consola qué devuelve Amplemarket
+console.log('Amplemarket raw response:', data);
 
-    pageAfter = data.page_after || null;
-  } while (pageAfter);
-
-  return allLists;
+if (data.items && Array.isArray(data.items)) {
+  allLists.push(...data.items);
+} else if (Array.isArray(data)) {
+  allLists.push(...data);
+} else {
+  throw new Error(`Unexpected Amplemarket response format`);
 }
+
+pageAfter = data.page_after || null;
+
 
 async function fetchAmplemarketLeads(apiToken, listId) {
   const leads = [];
