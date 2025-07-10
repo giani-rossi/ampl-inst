@@ -183,38 +183,38 @@ async function fetchInstantlyCampaigns(apiKey) {
   const limit = 100;
 
   do {
-  const response = await fetch(
-  `https://api.instantly.ai/api/v2/campaigns?skip=${skip}&limit=${limit}`,
-  {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    }
-  }
-);
-
+    const response = await fetch(
+      `https://api.instantly.ai/api/v2/campaigns?skip=${skip}&limit=${limit}`,
+      {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        }
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Instantly API error: ${response.status} - ${errorText}`);
     }
 
-   const data = await response.json();
-const campaigns = data?.data || [];
+    const data = await response.json();
+    const campaigns = data?.items || [];
 
-if (Array.isArray(campaigns)) {
-  allCampaigns.push(...campaigns);
-  skip += campaigns.length;
-  if (campaigns.length < limit) break;
-} else {
-  break;
-}
+    if (Array.isArray(campaigns)) {
+      allCampaigns.push(...campaigns);
+      skip += campaigns.length;
+      if (campaigns.length < limit) break;
+    } else {
+      break;
+    }
 
   } while (true);
 
   return allCampaigns;
 }
+
 
 async function sendLeadsToInstantly(apiKey, campaignId, leads) {
   const instantlyLeads = leads.map(lead => ({
