@@ -183,10 +183,17 @@ async function fetchInstantlyCampaigns(apiKey) {
   const limit = 100;
 
   do {
-    const response = await fetch(
-      `https://api.instantly.ai/api/v2/campaigns?api_key=${apiKey}&skip=${skip}&limit=${limit}`,
-      { method: 'GET', headers: { 'Accept': 'application/json' } }
-    );
+  const response = await fetch(
+  `https://api.instantly.ai/api/v2/campaigns?skip=${skip}&limit=${limit}`,
+  {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    }
+  }
+);
+
 
     if (!response.ok) {
       const errorText = await response.text();
