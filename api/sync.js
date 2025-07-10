@@ -126,13 +126,12 @@ async function fetchAmplemarketLists(apiToken) {
     const data = await response.json();
     console.log('Amplemarket raw response:', data);
 
-    if (data.items && Array.isArray(data.items)) {
-      allLists.push(...data.items);
-    } else if (Array.isArray(data)) {
-      allLists.push(...data);
-    } else {
-      throw new Error(`Unexpected Amplemarket response format`);
-    }
+ if (data.lead_lists && Array.isArray(data.lead_lists)) {
+  allLists.push(...data.lead_lists);
+} else {
+  throw new Error(`Unexpected Amplemarket response format`);
+}
+
 
     pageAfter = data.page_after || null;
   } while (pageAfter);
