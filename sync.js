@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 
-async function syncAmplemarketToInstantly(amplemarketToken, instantlyToken) {
+async function syncAmplemarketToInstantly(amplemarketToken, instantlyV2Token, instantlyV1ApiKey) {
   const results = {
     processed: [],
     skipped: [],
@@ -22,7 +22,7 @@ async function syncAmplemarketToInstantly(amplemarketToken, instantlyToken) {
       };
     }
 
-    const instantlyCampaigns = await fetchInstantlyCampaigns(instantlyToken);
+const instantlyCampaigns = await fetchInstantlyCampaigns(instantlyV2Token);
     results.debug.campaignsCount = instantlyCampaigns.length;
 
     const campaignMap = new Map();
@@ -60,11 +60,8 @@ async function syncAmplemarketToInstantly(amplemarketToken, instantlyToken) {
           continue;
         }
 
-        const importResult = await sendLeadsToInstantly(
-          instantlyToken,
-          matchingCampaign.id,
-          leads
-        );
+  
+const importResult = await sendLeadsToInstantly(instantlyV1ApiKey, matchingCampaign.id, leads);
 
         results.processed.push({
           listName: list.name,
