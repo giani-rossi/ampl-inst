@@ -200,15 +200,17 @@ async function fetchInstantlyCampaigns(apiKey) {
       throw new Error(`Instantly API error: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json();
+   const data = await response.json();
+const campaigns = data?.data || [];
 
-    if (Array.isArray(data)) {
-      allCampaigns.push(...data);
-      skip += data.length;
-      if (data.length < limit) break;
-    } else {
-      break;
-    }
+if (Array.isArray(campaigns)) {
+  allCampaigns.push(...campaigns);
+  skip += campaigns.length;
+  if (campaigns.length < limit) break;
+} else {
+  break;
+}
+
   } while (true);
 
   return allCampaigns;
