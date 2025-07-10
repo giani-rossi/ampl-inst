@@ -1,15 +1,5 @@
 const fetch = require('node-fetch');
 
-module.exports = async function (req, res) {
-  try {
-    const { amplemarketToken, instantlyToken } = req.body;
-    const result = await syncAmplemarketToInstantly(amplemarketToken, instantlyToken);
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ error: error.message, stack: error.stack });
-  }
-};
-
 async function syncAmplemarketToInstantly(amplemarketToken, instantlyToken) {
   const results = {
     processed: [],
@@ -252,3 +242,4 @@ async function sendLeadsToInstantly(apiKey, campaignId, leads) {
     results
   };
 }
+module.exports = syncAmplemarketToInstantly;
