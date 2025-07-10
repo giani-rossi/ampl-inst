@@ -1,20 +1,16 @@
-export async function POST(request) {
+// Adaptación a CommonJS para Vercel sin usar modules ni .mjs
+const fetch = require('node-fetch');
+
+module.exports = async function (req, res) {
   try {
-    const { amplemarketToken, instantlyToken } = await request.json();
-
+    const { amplemarketToken, instantlyToken } = req.body;
     const result = await syncAmplemarketToInstantly(amplemarketToken, instantlyToken);
-    return new Response(JSON.stringify(result), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    res.status(200).json(result);
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message, stack: error.stack }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    res.status(500).json({ error: error.message, stack: error.stack });
   }
-}
+};
 
-// Main sync function
 async function syncAmplemarketToInstantly(amplemarketToken, instantlyToken) {
   const results = {
     processed: [],
@@ -25,7 +21,6 @@ async function syncAmplemarketToInstantly(amplemarketToken, instantlyToken) {
   };
 
   try {
-    // Step 1: Fetch all lead lists from Amplemarket
     const leadLists = await fetchAmplemarketLists(amplemarketToken);
     results.debug.listsCount = leadLists.length;
     results.debug.sampleList = leadLists[0];
@@ -38,7 +33,6 @@ async function syncAmplemarketToInstantly(amplemarketToken, instantlyToken) {
       };
     }
 
-    // Step 2: Fetch all campaigns from Instantly
     const instantlyCampaigns = await fetchInstantlyCampaigns(instantlyToken);
     results.debug.campaignsCount = instantlyCampaigns.length;
 
@@ -47,7 +41,6 @@ async function syncAmplemarketToInstantly(amplemarketToken, instantlyToken) {
       campaignMap.set(campaign.name.toLowerCase(), campaign);
     });
 
-    // Step 3: Process each lead list
     for (const list of leadLists) {
       if (!list.id || !list.name) {
         results.errors.push({
@@ -108,7 +101,6 @@ async function syncAmplemarketToInstantly(amplemarketToken, instantlyToken) {
   return results;
 }
 
-// Helpers
 async function fetchAmplemarketLists(apiToken) {
   const allLists = [];
   let pageAfter = null;
@@ -132,20 +124,21 @@ async function fetchAmplemarketLists(apiToken) {
     }
 
     const data = await response.json();
+    console.log('Amplemarket raw response:', data);
 
-// DEBUG: Mostramos en consola qué devuelve Amplemarket
-console.log('Amplemarket raw response:', data);
+    if (data.items && Array.isArray(data.items)) {
+      allLists.push(...data.items);
+    } else if (Array.isArray(data)) {
+      allLists.push(...data);
+    } else {
+      throw new Error(`Unexpected Amplemarket response format`);
+    }
 
-if (data.items && Array.isArray(data.items)) {
-  allLists.push(...data.items);
-} else if (Array.isArray(data)) {
-  allLists.push(...data);
-} else {
-  throw new Error(`Unexpected Amplemarket response format`);
+    pageAfter = data.page_after || null;
+  } while (pageAfter);
+
+  return allLists;
 }
-
-pageAfter = data.page_after || null;
-
 
 async function fetchAmplemarketLeads(apiToken, listId) {
   const leads = [];
