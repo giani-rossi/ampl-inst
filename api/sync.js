@@ -22,7 +22,7 @@ async function syncAmplemarketToInstantly(amplemarketToken, instantlyV2Token, in
       };
     }
 
-const instantlyCampaigns = await fetchInstantlyCampaigns(instantlyV2Token);
+    const instantlyCampaigns = await fetchInstantlyCampaigns(instantlyV2Token);
     results.debug.campaignsCount = instantlyCampaigns.length;
 
     const campaignMap = new Map();
@@ -60,8 +60,7 @@ const instantlyCampaigns = await fetchInstantlyCampaigns(instantlyV2Token);
           continue;
         }
 
-  
-const importResult = await sendLeadsToInstantly(instantlyV1ApiKey, matchingCampaign.id, leads);
+        const importResult = await sendLeadsToInstantly(instantlyV1ApiKey, matchingCampaign.id, leads);
 
         results.processed.push({
           listName: list.name,
@@ -110,8 +109,6 @@ async function fetchAmplemarketLists(apiToken) {
     }
 
     const data = await response.json();
-    console.log('Amplemarket raw response:', data);
-
     if (data.lead_lists && Array.isArray(data.lead_lists)) {
       allLists.push(...data.lead_lists);
     } else {
@@ -124,7 +121,6 @@ async function fetchAmplemarketLists(apiToken) {
   return allLists;
 }
 
-// 🔁 ✅ FUNCION MODIFICADA (usa /lead-lists/{id} para obtener los leads)
 async function fetchAmplemarketLeads(apiToken, listId) {
   const response = await fetch(`https://api.amplemarket.com/lead-lists/${listId}`, {
     headers: {
@@ -239,4 +235,27 @@ async function sendLeadsToInstantly(apiKey, campaignId, leads) {
     results
   };
 }
-module.exports = syncAmplemarketToInstantly;
+
+// 👇 Exportá el handler HTTP directamente
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { amplemarketToken, instantlyV2Token, instantlyV1ApiKey } = req.body;
+
+  if (!amplemarketToken || !instantlyV2Token || !instantlyV1ApiKey) {
+    return res.status(400).json({ error: 'Missing one or more required tokens' });
+  }
+
+  try {
+    const result = await syncAmplemarketToInstantly(
+      amplemarketToken,
+      instantlyV2Token,
+      instantlyV1ApiKey
+    );
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+}
